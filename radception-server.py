@@ -7,7 +7,6 @@ from flask_cors import CORS
 
 app = flask.Flask(__name__)
 CORS(app)
-app.config['CORS_HEADERS'] = 'Content-Type'
 
 cred = credentials.Certificate('./radception-database-credentials.json')
 firebase_admin.initialize_app(cred, options={
@@ -15,6 +14,10 @@ firebase_admin.initialize_app(cred, options={
 })
 USERS = db.reference('users')
 DEVICES = db.reference('devices')
+
+@app.route("/")
+def hello():
+    return "Hello World!"
 
 @app.route('/users', methods=['POST'])
 def create_user():
@@ -86,9 +89,3 @@ def _ensure_device(id):
     if not device:
         flask.abort(404)
     return device
-
-@app.after_request
-def after_request(response):
-    header = response.headers
-    header['Access-Control-Allow-Origin'] = '*'
-    return response
