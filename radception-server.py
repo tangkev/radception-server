@@ -3,7 +3,7 @@ from firebase_admin import db
 from firebase_admin import credentials
 import json
 import flask
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 
 app = flask.Flask(__name__)
 CORS(app)
@@ -17,19 +17,16 @@ USERS = db.reference('users')
 DEVICES = db.reference('devices')
 
 @app.route('/users', methods=['POST'])
-@cross_origin()
 def create_user():
     req = flask.request.json
     user = USERS.child(req["username"]).set(req)
     return flask.jsonify({'id': user.key}), 201
 
 @app.route('/users/<id>')
-@cross_origin()
 def read_user(id):
     return flask.jsonify(_ensure_user(id))
 
 @app.route('/users/<id>', methods=['PUT'])
-@cross_origin()
 def update_user(id):
     _ensure_user(id)
     req = flask.request.json
@@ -37,7 +34,6 @@ def update_user(id):
     return flask.jsonify({'success': True})
 
 @app.route('/users/<id>', methods=['DELETE'])
-@cross_origin()
 def delete_user(id):
     _ensure_user(id)
     USERS.child(id).delete()
@@ -52,19 +48,16 @@ def _ensure_user(id):
 current_readings = [[], 0, 0]
 
 @app.route('/devices', methods=['POST'])
-@cross_origin()
 def create_device():
     req = flask.request.json
     device = DEVICES.child(req["device_id"]).set(req)
     return flask.jsonify({'id': device.key}), 201
 
 @app.route('/devices/<id>')
-@cross_origin()
 def read_device(id):
     return flask.jsonify(_ensure_device(id))
 
 @app.route('/devices/<id>', methods=['PUT'])
-@cross_origin()
 def update_device(id):
     _ensure_device(id)
     req = flask.request.json
@@ -83,7 +76,6 @@ def update_device(id):
     return flask.jsonify({'success': True})
 
 @app.route('/devices/<id>', methods=['DELETE'])
-@cross_origin()
 def delete_device(id):
     _ensure_device(id)
     DEVICES.child(id).delete()
@@ -94,3 +86,9 @@ def _ensure_device(id):
     if not device:
         flask.abort(404)
     return device
+
+@app.after_request
+def after_request(response):
+    header = response.headers
+    header['Access-Control-Allow-Origin'] = '*'
+    return response
