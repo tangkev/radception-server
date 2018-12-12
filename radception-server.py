@@ -7,6 +7,7 @@ from flask_cors import CORS
 
 app = flask.Flask(__name__)
 CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 cred = credentials.Certificate('./radception-database-credentials.json')
 firebase_admin.initialize_app(cred, options={
